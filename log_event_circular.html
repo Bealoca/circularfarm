@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Log Event — Circular Farm</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f1109;
+      --surface: #161a0e;
+      --surface2: #1e2415;
+      --border: #2e3820;
+      --green: #8aad4a;
+      --green-dim: #4a6128;
+      --green-glow: rgba(138,173,74,0.08);
+      --text: #d4dfc0;
+      --text-muted: #6b7a52;
+      --text-dim: #3d4a2a;
+      --accent: #c4a84a;
+      --error: #c45a3a;
+      --success: #4aad6a;
+      --radius: 3px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'IBM Plex Mono', monospace;
+      min-height: 100vh;
+      padding: 48px 20px 80px;
+      display: flex;
+      justify-content: center;
+    }
+    .page { width: 100%; max-width: 520px; }
+    header {
+      margin-bottom: 40px;
+      border-left: 2px solid var(--green);
+      padding-left: 16px;
+    }
+    .farm-label {
+      font-size: 9px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .back-link {
+      display: inline-block;
+      font-size: 10px;
+      color: var(--text-muted);
+      text-decoration: none;
+      margin-bottom: 16px;
+      letter-spacing: 0.05em;
+    }
+    .back-link:hover { color: var(--green); }
+    h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: 40px;
+      color: var(--text);
+      line-height: 1;
+      font-style: italic;
+    }
+    h1 span { color: var(--green); font-style: normal; font-weight: 400; }
+
+    .selected-item {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--green);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-bottom: 32px;
+      display: none;
+    }
+    .selected-item.visible { display: block; }
+    .selected-item-label {
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .selected-item-value {
+      font-size: 16px;
+      color: var(--green);
+      letter-spacing: 0.04em;
+    }
+    .selected-item-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .section { margin-bottom: 28px; }
+    .section-header {
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+      margin-bottom: 18px;
+    }
+    .field { margin-bottom: 18px; }
+    label {
+      display: block;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 7px;
+    }
+    label .required { color: var(--green); margin-left: 2px; }
+    input, select, textarea {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 13px;
+      color: var(--text);
+      transition: border-color 0.15s, box-shadow 0.15s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--green-dim);
+      box-shadow: 0 0 0 3px var(--green-glow);
+    }
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b7a52' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 32px;
+      cursor: pointer;
+    }
+    select option { background: var(--surface); color: var(--text); }
+    textarea { resize: vertical; min-height: 72px; line-height: 1.5; }
+    .hint { font-size: 10px; color: var(--text-muted); margin-top: 5px; line-height: 1.4; }
+
+    /* Event type buttons */
+    .event-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .event-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 12px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s;
+    }
+    .event-btn:hover {
+      border-color: var(--green-dim);
+      color: var(--text);
+    }
+    .event-btn.active {
+      background: var(--green-dim);
+      border-color: var(--green);
+      color: var(--text);
+    }
+
+    .submit-wrap { margin-top: 32px; }
+    button[type="submit"] {
+      width: 100%;
+      background: var(--green-dim);
+      color: var(--text);
+      border: 1px solid var(--green-dim);
+      border-radius: var(--radius);
+      padding: 13px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    button[type="submit"]:hover {
+      background: var(--green);
+      border-color: var(--green);
+      color: var(--bg);
+    }
+    button[type="submit"]:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .status {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: var(--radius);
+      font-size: 11px;
+      line-height: 1.5;
+      display: none;
+    }
+    .status.success {
+      background: rgba(74,173,106,0.1);
+      border: 1px solid rgba(74,173,106,0.3);
+      color: var(--success);
+      display: block;
+    }
+    .status.error {
+      background: rgba(196,90,58,0.1);
+      border: 1px solid rgba(196,90,58,0.3);
+      color: var(--error);
+      display: block;
+    }
+    select.loading { color: var(--text-dim); }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <a href="index.html" class="back-link">← back</a>
+  <header>
+    <div class="farm-label">Circular Farm</div>
+    <h1>Log <span>Event</span></h1>
+  </header>
+
+  <!-- Section: pick item -->
+  <div class="section">
+    <div class="section-header">Item</div>
+
+    <div class="field">
+      <label>Mycelium</label>
+      <select id="myceliumFilter" class="loading" onchange="filterByMycelium()">
+        <option value="">— all —</option>
+      </select>
+      <div class="hint">narrow the list below, optional</div>
+    </div>
+
+    <div class="field">
+      <label>Item <span class="required">*</span></label>
+      <select id="itemId" required class="loading" onchange="onItemChange()">
+        <option value="">— loading —</option>
+      </select>
+    </div>
+
+    <div class="selected-item" id="selectedItem">
+      <div class="selected-item-label">Selected</div>
+      <div class="selected-item-value" id="selectedItemId"></div>
+      <div class="selected-item-meta" id="selectedItemMeta"></div>
+    </div>
+  </div>
+
+  <!-- Section: event type -->
+  <div class="section">
+    <div class="section-header">What happened</div>
+    <div class="event-grid" id="eventGrid">
+      <div class="event-btn" data-value="moved_to_fruiting" onclick="selectEvent(this)">Moved to fruiting</div>
+      <div class="event-btn" data-value="dormant" onclick="selectEvent(this)">Dormant (fridge)</div>
+      <div class="event-btn" data-value="disposed" onclick="selectEvent(this)">Disposed of</div>
+      <div class="event-btn" data-value="contaminated" onclick="selectEvent(this)">Contaminated</div>
+    </div>
+    <input type="hidden" id="eventType" required>
+  </div>
+
+  <!-- Section: details -->
+  <div class="section">
+    <div class="section-header">Details</div>
+    <div class="field">
+      <label>Date <span class="required">*</span></label>
+      <input type="date" id="eventDate" required>
+    </div>
+    <div class="field">
+      <label>Notes</label>
+      <textarea id="notes" placeholder="Anything worth recording..."></textarea>
+    </div>
+  </div>
+
+  <div class="submit-wrap">
+    <button type="submit" id="submitBtn" onclick="submitForm()">Log event</button>
+    <div class="status" id="statusMsg"></div>
+  </div>
+
+</div>
+
+<script>
+  // ─── CONFIGURATION ───────────────────────────────────────────
+  const SUPABASE_URL = 'https://lhtbiqaoeoeuzxicbdjj.supabase.co'
+  const SUPABASE_KEY = 'sb_publishable_eiXzRGPpq-UVJ2MsuznSCQ_SmxKZY35'
+  // ─────────────────────────────────────────────────────────────
+
+  const headers = {
+    'Content-Type': 'application/json',
+    'apikey': SUPABASE_KEY,
+    'Authorization': `Bearer ${SUPABASE_KEY}`
+  }
+
+  let allItems = []
+
+  function init() {
+    const today = new Date().toISOString().slice(0, 10)
+    document.getElementById('eventDate').value = today
+    loadMyceliumFilter()
+    loadItems()
+    checkUrlParams()
+  }
+
+  // Pre-fill item if coming from a QR scan: page.html?item=WR-001
+  function checkUrlParams() {
+    const params = new URLSearchParams(window.location.search)
+    const itemParam = params.get('item')
+    if (itemParam) {
+      setTimeout(() => {
+        document.getElementById('itemId').value = itemParam
+        onItemChange()
+      }, 500)
+    }
+  }
+
+  async function loadMyceliumFilter() {
+    try {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/mushroom_variety?select=mycelium_id&order=mycelium_id.asc&apikey=${SUPABASE_KEY}`,
+        { headers }
+      )
+      const varieties = await res.json()
+      const sel = document.getElementById('myceliumFilter')
+      sel.innerHTML = '<option value="">— all —</option>'
+      sel.classList.remove('loading')
+      varieties.forEach(v => {
+        const opt = document.createElement('option')
+        opt.value = v.mycelium_id
+        opt.textContent = v.mycelium_id
+        sel.appendChild(opt)
+      })
+    } catch (err) {
+      console.error('Error loading mycelium filter:', err)
+    }
+  }
+
+  async function loadItems() {
+    try {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/items?select=id,type,mycelium,created_at&order=created_at.desc&apikey=${SUPABASE_KEY}`,
+        { headers }
+      )
+      allItems = await res.json()
+      populateItemDropdown(allItems)
+    } catch (err) {
+      console.error('Error loading items:', err)
+    }
+  }
+
+  function populateItemDropdown(items) {
+    const sel = document.getElementById('itemId')
+    sel.innerHTML = '<option value="">— select item —</option>'
+    sel.classList.remove('loading')
+    items.forEach(item => {
+      const opt = document.createElement('option')
+      opt.value = item.id
+      opt.textContent = `${item.id} — ${item.type}`
+      sel.appendChild(opt)
+    })
+  }
+
+  function filterByMycelium() {
+    const val = document.getElementById('myceliumFilter').value
+    if (val) {
+      populateItemDropdown(allItems.filter(i => i.mycelium === val))
+    } else {
+      populateItemDropdown(allItems)
+    }
+  }
+
+  function onItemChange() {
+    const val = document.getElementById('itemId').value
+    const box = document.getElementById('selectedItem')
+    if (!val) {
+      box.classList.remove('visible')
+      return
+    }
+    const item = allItems.find(i => i.id === val)
+    if (item) {
+      document.getElementById('selectedItemId').textContent = item.id
+      document.getElementById('selectedItemMeta').textContent = `${item.type} — ${item.mycelium} — created ${item.created_at}`
+      box.classList.add('visible')
+    }
+  }
+
+  function selectEvent(el) {
+    document.querySelectorAll('.event-btn').forEach(b => b.classList.remove('active'))
+    el.classList.add('active')
+    document.getElementById('eventType').value = el.dataset.value
+  }
+
+  async function submitForm() {
+    const btn = document.getElementById('submitBtn')
+    const status = document.getElementById('statusMsg')
+    status.className = 'status'
+
+    const itemId = document.getElementById('itemId').value
+    const eventType = document.getElementById('eventType').value
+    const eventDate = document.getElementById('eventDate').value
+    const notes = document.getElementById('notes').value || null
+
+    if (!itemId || !eventType || !eventDate) {
+      status.textContent = 'Please select an item, an event type, and a date.'
+      status.className = 'status error'
+      return
+    }
+
+    btn.disabled = true
+    btn.textContent = 'Logging...'
+
+    try {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/events?apikey=${SUPABASE_KEY}`,
+        {
+          method: 'POST',
+          headers: { ...headers, 'Prefer': 'return=representation' },
+          body: JSON.stringify({
+            source_item_id: itemId,
+            event_type: eventType,
+            created_at: eventDate,
+            notes: notes
+          })
+        }
+      )
+
+      if (res.ok) {
+        status.textContent = `✓ Event logged for ${itemId}.`
+        status.className = 'status success'
+        setTimeout(() => {
+          document.getElementById('itemId').value = ''
+          document.getElementById('myceliumFilter').value = ''
+          document.querySelectorAll('.event-btn').forEach(b => b.classList.remove('active'))
+          document.getElementById('eventType').value = ''
+          document.getElementById('notes').value = ''
+          document.getElementById('selectedItem').classList.remove('visible')
+          populateItemDropdown(allItems)
+          status.className = 'status'
+        }, 2000)
+      } else {
+        const err = await res.json()
+        status.textContent = `Error: ${err.message || err.details || JSON.stringify(err)}`
+        status.className = 'status error'
+      }
+    } catch (err) {
+      status.textContent = `Connection error: ${err.message}`
+      status.className = 'status error'
+    }
+
+    btn.disabled = false
+    btn.textContent = 'Log event'
+  }
+
+  init()
+</script>
+</body>
+</html>

@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Item — Circular Farm</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f1109;
+      --surface: #161a0e;
+      --surface2: #1e2415;
+      --border: #2e3820;
+      --green: #8aad4a;
+      --green-dim: #4a6128;
+      --green-glow: rgba(138,173,74,0.08);
+      --text: #d4dfc0;
+      --text-muted: #6b7a52;
+      --text-dim: #3d4a2a;
+      --accent: #c4a84a;
+      --error: #c45a3a;
+      --success: #4aad6a;
+      --radius: 3px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'IBM Plex Mono', monospace;
+      min-height: 100vh;
+      padding: 48px 20px 80px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .page {
+      width: 100%;
+      max-width: 520px;
+    }
+
+    /* Header */
+    header {
+      margin-bottom: 40px;
+      border-left: 2px solid var(--green);
+      padding-left: 16px;
+    }
+
+    .farm-label {
+      font-size: 9px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: 40px;
+      color: var(--text);
+      line-height: 1;
+      font-style: italic;
+    }
+
+    h1 span {
+      color: var(--green);
+      font-style: normal;
+      font-weight: 400;
+    }
+
+    /* Item ID display */
+    .id-display {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--green);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .id-label {
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .id-value {
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--green);
+      letter-spacing: 0.08em;
+    }
+
+    .id-value.pending {
+      color: var(--text-dim);
+      font-size: 12px;
+      font-style: italic;
+      font-weight: 300;
+    }
+
+    /* Form sections */
+    .section {
+      margin-bottom: 28px;
+    }
+
+    .section-header {
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+      margin-bottom: 18px;
+    }
+
+    .field {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 7px;
+    }
+
+    label .required {
+      color: var(--green);
+      margin-left: 2px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 13px;
+      color: var(--text);
+      transition: border-color 0.15s, box-shadow 0.15s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--green-dim);
+      box-shadow: 0 0 0 3px var(--green-glow);
+    }
+
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b7a52' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 32px;
+      cursor: pointer;
+    }
+
+    select option {
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 72px;
+      line-height: 1.5;
+    }
+
+    .hint {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 5px;
+      line-height: 1.4;
+    }
+
+    /* Mycelium full name preview */
+    .mycelium-preview {
+      margin-top: 6px;
+      font-size: 11px;
+      color: var(--accent);
+      font-style: italic;
+      min-height: 16px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 15px;
+    }
+
+    /* Parent item info card */
+    .parent-info {
+      margin-top: 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      font-size: 11px;
+      color: var(--text-muted);
+      display: none;
+      line-height: 1.6;
+    }
+
+    .parent-info.visible {
+      display: block;
+    }
+
+    .parent-info strong {
+      color: var(--green);
+      font-weight: 500;
+    }
+
+    /* Quantity field row */
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    /* Submit button */
+    .submit-wrap {
+      margin-top: 32px;
+    }
+
+    button[type="submit"] {
+      width: 100%;
+      background: var(--green-dim);
+      color: var(--text);
+      border: 1px solid var(--green-dim);
+      border-radius: var(--radius);
+      padding: 13px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    button[type="submit"]:hover {
+      background: var(--green);
+      border-color: var(--green);
+      color: var(--bg);
+    }
+
+    button[type="submit"]:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* Status messages */
+    .status {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: var(--radius);
+      font-size: 11px;
+      line-height: 1.5;
+      display: none;
+    }
+
+    .status.success {
+      background: rgba(74,173,106,0.1);
+      border: 1px solid rgba(74,173,106,0.3);
+      color: var(--success);
+      display: block;
+    }
+
+    .status.error {
+      background: rgba(196,90,58,0.1);
+      border: 1px solid rgba(196,90,58,0.3);
+      color: var(--error);
+      display: block;
+    }
+
+    /* Loading state for selects */
+    select.loading {
+      color: var(--text-dim);
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="farm-label">Circular Farm</div>
+    <h1>New <span>Item</span></h1>
+  </header>
+
+  <!-- Auto-generated ID preview -->
+  <div class="id-display">
+    <div class="id-label">Item ID</div>
+    <div class="id-value pending" id="idPreview">generated on save</div>
+  </div>
+
+  <!-- Section 1: What are you making -->
+  <div class="section">
+    <div class="section-header">What are you making</div>
+
+    <div class="field">
+      <label>Mycelium <span class="required">*</span></label>
+      <select id="mycelium" required class="loading" onchange="onMyceliumChange()">
+        <option value="">— loading —</option>
+      </select>
+      <div class="mycelium-preview" id="myceliumFullName"></div>
+    </div>
+
+    <div class="field">
+  <label>Item type <span class="required">*</span></label>
+  <select id="type" required class="loading">
+    <option value="">— loading —</option>
+  </select>
+</div>
+
+    <div class="field-row">
+      <div class="field">
+        <label>Quantity <span class="required">*</span></label>
+        <input type="number" id="quantity" min="1" value="1" required>
+        <div class="hint">items being created</div>
+      </div>
+      <div class="field">
+        <label>Date <span class="required">*</span></label>
+        <input type="date" id="createdAt" required>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: Source / lineage -->
+  <div class="section">
+    <div class="section-header">Source item (parent)</div>
+
+    <div class="field">
+      <label>Parent item</label>
+      <select id="parentId" class="loading" onchange="onParentChange()">
+        <option value="">— none / first generation —</option>
+      </select>
+      <div class="hint">the item this was made from</div>
+      <div class="parent-info" id="parentInfo"></div>
+    </div>
+  </div>
+
+  <!-- Section 3: Notes -->
+  <div class="section">
+    <div class="section-header">Notes</div>
+    <div class="field">
+      <textarea id="notes" placeholder="Observations, conditions, anything worth recording..."></textarea>
+    </div>
+  </div>
+
+  <div class="submit-wrap">
+    <button type="submit" id="submitBtn" onclick="submitForm()">Register item</button>
+    <div class="status" id="statusMsg"></div>
+  </div>
+
+</div>
+
+<script>
+  // ─── CONFIGURATION ───────────────────────────────────────────
+  const SUPABASE_URL = 'https://lhtbiqaoeoeuzxicbdjj.supabase.co'
+  const SUPABASE_KEY = 'sb_publishable_eiXzRGPpq-UVJ2MsuznSCQ_SmxKZY35'
+  // ─────────────────────────────────────────────────────────────
+
+  const headers = {
+    'Content-Type': 'application/json',
+    'apikey': SUPABASE_KEY,
+    'Authorization': `Bearer ${SUPABASE_KEY}`
+  }
+
+  let varieties = []
+  let allItems = []
+
+  // ─── INIT ────────────────────────────────────────────────────
+
+  function init() {
+    const today = new Date().toISOString().slice(0, 10)
+    document.getElementById('createdAt').value = today
+    loadVarieties()
+    loadSubstrates()
+    loadItems()
+  }
+
+  // ─── LOAD DROPDOWNS ──────────────────────────────────────────
+
+  async function loadVarieties() {
+    try {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/mushroom_variety?select=mycelium_id,name&apikey=${SUPABASE_KEY}`,
+        { headers }
+      )
+      varieties = await res.json()
+      const sel = document.getElementById('mycelium')
+      sel.innerHTML = '<option value="">— select mycelium —</option>'
+      sel.classList.remove('loading')
+      varieties.forEach(v => {
+        const opt = document.createElement('option')
+        opt.value = v.mycelium_id
+        opt.textContent = v.mycelium_id
+        sel.appendChild(opt)
+      })
+    } catch (err) {
+      console.error('Error loading varieties:', err)
+    }
+  }
+
+
+async function loadSubstrates() {
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/substrate?select=name&apikey=${SUPABASE_KEY}`,
+      { headers }
+    )
+    const substrates = await res.json()
+    const sel = document.getElementById('type')
+    sel.innerHTML = '<option value="">— select type —</option>'
+    sel.classList.remove('loading')
+    substrates.forEach(s => {
+      const opt = document.createElement('option')
+      opt.value = s.name
+      opt.textContent = s.name
+      sel.appendChild(opt)
+    })
+  } catch (err) {
+    console.error('Error loading substrates:', err)
+  }
+}
+
+
+  async function loadItems() {
+    try {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/items?select=id,type,mycelium,created_at&order=created_at.desc&apikey=${SUPABASE_KEY}`,
+        { headers }
+      )
+      allItems = await res.json()
+      populateParentDropdown(allItems)
+    } catch (err) {
+      console.error('Error loading items:', err)
+    }
+  }
+
+  function populateParentDropdown(items) {
+    const sel = document.getElementById('parentId')
+    const currentValue = sel.value
+    sel.innerHTML = '<option value="">— none / first generation —</option>'
+    sel.classList.remove('loading')
+    items.forEach(item => {
+      const opt = document.createElement('option')
+      opt.value = item.id
+      opt.textContent = `${item.id} — ${item.type} — ${item.mycelium}`
+      sel.appendChild(opt)
+    })
+    if (currentValue) sel.value = currentValue
+  }
+
+  // ─── CHANGE HANDLERS ─────────────────────────────────────────
+
+  function onMyceliumChange() {
+    const val = document.getElementById('mycelium').value
+    const variety = varieties.find(v => v.mycelium_id === val)
+    document.getElementById('myceliumFullName').textContent = variety ? variety.name : ''
+    updateIdPreview()
+    // Filter parent dropdown to only show items of this mycelium
+  if (val) {
+    const filtered = allItems.filter(i => i.mycelium === val)
+    populateParentDropdown(filtered)
+  } else {
+    populateParentDropdown(allItems)
+  }   
+  }
+
+
+  function onParentChange() {
+    const val = document.getElementById('parentId').value
+    const infoEl = document.getElementById('parentInfo')
+    if (!val) {
+      infoEl.classList.remove('visible')
+      return
+    }
+    const item = allItems.find(i => i.id === val)
+    if (item) {
+      infoEl.innerHTML = `<strong>${item.id}</strong> &nbsp;·&nbsp; ${item.type} &nbsp;·&nbsp; ${item.mycelium} &nbsp;·&nbsp; ${item.created_at}`
+      infoEl.classList.add('visible')
+
+      // Auto-fill mycelium from parent if not already selected
+      const myceliumSel = document.getElementById('mycelium')
+      if (!myceliumSel.value) {
+        myceliumSel.value = item.mycelium
+        onMyceliumChange()
+      }
+    }
+  }
+
+  function updateIdPreview() {
+    const mycelium = document.getElementById('mycelium').value
+    const preview = document.getElementById('idPreview')
+    if (mycelium) {
+      preview.textContent = `${mycelium}-###`
+      preview.classList.remove('pending')
+    } else {
+      preview.textContent = 'generated on save'
+      preview.classList.add('pending')
+    }
+  }
+
+  // ─── SUBMIT ──────────────────────────────────────────────────
+
+  async function submitForm() {
+    const btn = document.getElementById('submitBtn')
+    const status = document.getElementById('statusMsg')
+    status.className = 'status'
+
+    const mycelium = document.getElementById('mycelium').value
+    const type = document.getElementById('type').value
+    const quantity = parseInt(document.getElementById('quantity').value) || 1
+    const createdAt = document.getElementById('createdAt').value
+    const parentId = document.getElementById('parentId').value || null
+    const notes = document.getElementById('notes').value || null
+
+    if (!mycelium || !type || !createdAt) {
+      status.textContent = 'Please fill in mycelium, type, and date.'
+      status.className = 'status error'
+      return
+    }
+
+    btn.disabled = true
+    btn.textContent = 'Registering...'
+
+    try {
+      // Get current count for this mycelium to generate IDs
+      const countRes = await fetch(
+        `${SUPABASE_URL}/rest/v1/items?mycelium=eq.${mycelium}&select=id&apikey=${SUPABASE_KEY}`,
+        { headers }
+      )
+      const existing = await countRes.json()
+console.log('existing items:', existing)
+      let nextNum = existing.length + 1
+
+      // Insert one row per item in the quantity
+      const inserts = []
+      for (let i = 0; i < quantity; i++) {
+        const itemId = `${mycelium}-${String(nextNum).padStart(3, '0')}`
+        nextNum++
+        inserts.push({
+          id: itemId,
+          mycelium: mycelium,
+          type: type,
+          parent_id: parentId,
+          notes: notes,
+          created_at: createdAt
+        })
+      }
+
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/items?apikey=${SUPABASE_KEY}`,
+        {
+          method: 'POST',
+          headers: { ...headers, 'Prefer': 'return=representation' },
+          body: JSON.stringify(inserts)
+        }
+      )
+
+      if (res.ok) {
+        const created = await res.json()
+        const ids = created.map(r => r.id).join(', ')
+        status.textContent = `✓ Created ${quantity} item${quantity > 1 ? 's' : ''}: ${ids}`
+        status.className = 'status success'
+
+        // Reset for next entry
+        setTimeout(() => {
+          document.getElementById('type').value = ''
+          document.getElementById('quantity').value = 1
+          document.getElementById('parentId').value = ''
+          document.getElementById('notes').value = ''
+          document.getElementById('parentInfo').classList.remove('visible')
+          status.className = 'status'
+          loadItems() // refresh parent dropdown with new items
+        }, 3000)
+      } else {
+        const err = await res.json()
+        status.textContent = `Error: ${err.message || err.details || JSON.stringify(err)}`
+        status.className = 'status error'
+      }
+
+    } catch (err) {
+      status.textContent = `Connection error: ${err.message}`
+      status.className = 'status error'
+    }
+
+    btn.disabled = false
+    btn.textContent = 'Register item'
+  }
+
+  // ─── START ───────────────────────────────────────────────────
+  init()
+</script>
+</body>
+</html>

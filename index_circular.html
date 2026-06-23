@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Circular Farm — Tracking</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f1109;
+      --surface: #161a0e;
+      --surface2: #1e2415;
+      --border: #2e3820;
+      --green: #8aad4a;
+      --green-dim: #4a6128;
+      --text: #d4dfc0;
+      --text-muted: #6b7a52;
+      --accent: #c4a84a;
+      --radius: 3px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'IBM Plex Mono', monospace;
+      min-height: 100vh;
+      padding: 64px 20px;
+      display: flex;
+      justify-content: center;
+    }
+    .page { width: 100%; max-width: 480px; }
+
+    header {
+      margin-bottom: 56px;
+      border-left: 2px solid var(--green);
+      padding-left: 16px;
+    }
+    .farm-label {
+      font-size: 9px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: 42px;
+      color: var(--text);
+      line-height: 1.05;
+      font-style: italic;
+    }
+    h1 span { color: var(--green); font-style: normal; font-weight: 400; }
+    .subtitle {
+      margin-top: 10px;
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+    }
+
+    .menu { display: flex; flex-direction: column; gap: 12px; }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      text-decoration: none;
+      transition: border-color 0.15s, transform 0.1s, background 0.15s;
+    }
+    .menu-item:hover {
+      border-color: var(--green-dim);
+      background: var(--surface2);
+      transform: translateX(2px);
+    }
+    .menu-item:active { transform: scale(0.99); }
+
+    .menu-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .menu-icon.green { background: rgba(138,173,74,0.12); color: var(--green); }
+    .menu-icon.amber { background: rgba(196,168,74,0.12); color: var(--accent); }
+
+    .menu-text { flex: 1; }
+    .menu-title {
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      color: var(--text);
+      margin-bottom: 3px;
+    }
+    .menu-desc {
+      font-size: 10px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+    .menu-arrow {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 32px 0 24px;
+    }
+
+    .section-label {
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+
+    footer {
+      margin-top: 56px;
+      font-size: 9px;
+      color: var(--text-dim, #3d4a2a);
+      letter-spacing: 0.05em;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="farm-label">Circular Farm</div>
+    <h1>Mushroom <span>Tracking</span></h1>
+    <div class="subtitle">Lineage, events &amp; harvests</div>
+  </header>
+
+  <div class="section-label">Register</div>
+  <div class="menu">
+    <a href="new_item_form.html" class="menu-item">
+      <div class="menu-icon green">●</div>
+      <div class="menu-text">
+        <div class="menu-title">New item</div>
+        <div class="menu-desc">Create a new bag, jar, or plate — links to its parent</div>
+      </div>
+      <div class="menu-arrow">→</div>
+    </a>
+  </div>
+
+  <hr class="divider">
+
+  <div class="section-label">Log activity</div>
+  <div class="menu">
+    <a href="log_event.html" class="menu-item">
+      <div class="menu-icon green">◐</div>
+      <div class="menu-text">
+        <div class="menu-title">Log event</div>
+        <div class="menu-desc">Moved to fruiting, dormant, disposed, contaminated</div>
+      </div>
+      <div class="menu-arrow">→</div>
+    </a>
+
+    <a href="log_harvest.html" class="menu-item">
+      <div class="menu-icon amber">▲</div>
+      <div class="menu-text">
+        <div class="menu-title">Log harvest</div>
+        <div class="menu-desc">Record kg harvested from an item</div>
+      </div>
+      <div class="menu-arrow">→</div>
+    </a>
+  </div>
+
+  <footer>Scan a bag's QR code to jump straight to the right form.</footer>
+
+</div>
+</body>
+</html>
